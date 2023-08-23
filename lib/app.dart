@@ -9,6 +9,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppModel extends ChangeNotifier {
+  final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
   final _deviceInfo = DeviceInfoPlugin();
   final _prefs = SharedPreferences.getInstance();
   final _urlPrefsKey = 'url';
@@ -26,7 +27,7 @@ class AppModel extends ChangeNotifier {
       return;
     }
 
-    final result = _getUrlFromRemoteConfig();
+    final result = await _getUrlFromRemoteConfig();
     if (result.isEmpty || await _checkIsEmu()) {
       navigator.pushReplacementNamed('/exercise_list');
       return;
@@ -40,8 +41,22 @@ class AppModel extends ChangeNotifier {
     }
   }
 
-  String _getUrlFromRemoteConfig() {
+  Future<String> _getUrlFromRemoteConfig() async {
+    await _initConfig();
     return FirebaseRemoteConfig.instance.getString('url');
+  }
+
+  Future<void> _initConfig() async {
+    await _remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(
+          seconds: 1,
+        ),
+        minimumFetchInterval: const Duration(seconds: 10),
+      ),
+    );
+
+    await _remoteConfig.fetchAndActivate();
   }
 
   Future<bool> _checkIsEmu() async {
@@ -77,7 +92,6 @@ class AppModel extends ChangeNotifier {
 }
 
 class App extends StatefulWidget {
-
   const App({Key? key}) : super(key: key);
 
   @override
@@ -97,15 +111,13 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        '/': (context) =>
-            ChangeNotifierProvider.value(
-                value: _appModel..load(context),
+        '/': (context) => ChangeNotifierProvider.value(
+              value: _appModel..load(context),
               child: Container(),
             ),
         '/exercise_list': (_) => const ExerciseListScreen(),
         '/exercise_item': (_) => const ExerciseItemScreen(),
-        '/web_view': (_) =>
-            ChangeNotifierProvider.value(
+        '/web_view': (_) => ChangeNotifierProvider.value(
               value: _appModel,
               child: MainView(),
             ),
