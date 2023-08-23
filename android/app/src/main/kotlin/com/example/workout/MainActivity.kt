@@ -1,4 +1,4 @@
-package com.example.workout
+package fortun.ei.facts.menderz
 
 import io.flutter.embedding.android.FlutterActivity
 

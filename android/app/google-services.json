@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "430816708374",
+    "project_id": "cfddjc",
+    "storage_bucket": "cfddjc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430816708374:android:298b3a72d291e468b13237",
+        "android_client_info": {
+          "package_name": "fortun.ei.facts.menderz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430816708374-5vrcqil75lippv5t80d6b6uvnfgi5j7v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByw63DIoIMyAhjFGWOZYPh4B6LbKvNJoQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430816708374-5vrcqil75lippv5t80d6b6uvnfgi5j7v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

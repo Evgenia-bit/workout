@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workout/screens/mock/exercise_item_screen.dart';
 import 'package:workout/screens/mock/model.dart';
+
 class ExerciseListScreen extends StatelessWidget {
   const ExerciseListScreen({Key? key}) : super(key: key);
 
@@ -16,7 +17,6 @@ class ExerciseListScreen extends StatelessWidget {
             backgroundColor: Colors.white,
             appBar: AppBar(
               title: const Text("Exercises"),
-              centerTitle: true,
             ),
             body: ListView.separated(
               padding: const EdgeInsets.all(18),
@@ -50,15 +50,7 @@ class _ExercisesListItem extends StatelessWidget {
         title: Text(exercise.title),
         leading: Image.asset(imagePath, width: 100),
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) {
-                return ExerciseItemScreen(
-                  exercise: exercise,
-                );
-              },
-            ),
-          );
+          Navigator.of(context).pushNamed('/exercise_item', arguments: exercise);
         },
       ),
     );

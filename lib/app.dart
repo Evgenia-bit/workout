@@ -1,31 +1,47 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:workout/screens/loading_screen.dart';
+import 'package:workout/screens/mock/exercise_item_screen.dart';
 import 'package:workout/screens/mock/exercise_list_screen.dart';
-import 'package:workout/screens/web_view.dart';
-import 'package:workout/utils/json_manager.dart';
+import 'package:workout/screens/web_view/web_view.dart';
+import 'package:workout/theme.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppModel extends ChangeNotifier {
-  final  _deviceInfo = DeviceInfoPlugin();
-  bool _isLoading = true;
-  bool get isLoading => _isLoading;
+  final _deviceInfo = DeviceInfoPlugin();
+  final _prefs = SharedPreferences.getInstance();
+  final _urlPrefsKey = 'url';
   String _url = '';
+
   String get url => _url;
 
-  AppModel() {
-    _load();
+  AppModel();
+
+  Future<void> load(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    _url = (await _prefs).getString(_urlPrefsKey) ?? '';
+    if (_url.isNotEmpty) {
+      navigator.pushReplacementNamed('/web_view');
+      return;
+    }
+
+    final result = _getUrlFromRemoteConfig();
+    if (result.isEmpty || await _checkIsEmu()) {
+      navigator.pushReplacementNamed('/exercise_list');
+      return;
+    }
+
+    if (result.isNotEmpty) {
+      _url = result;
+      notifyListeners();
+      (await _prefs).setString(_urlPrefsKey, _url);
+      navigator.pushReplacementNamed('/web_view');
+    }
   }
 
-  Future<void> _load() async {
-    Map<String, dynamic> json =
-        await JsonManager.readJson('assets/google-services.json');
-     _url = json['url'];
-    if (url.isEmpty) {
-      //TODO: обращение к Firebase за ссылкой
-    }
-    _isLoading = false;
-    notifyListeners();
+  String _getUrlFromRemoteConfig() {
+    return FirebaseRemoteConfig.instance.getString('url');
   }
 
   Future<bool> _checkIsEmu() async {
@@ -45,7 +61,7 @@ class AppModel extends ChangeNotifier {
         buildProduct == "google_sdk" ||
         buildProduct == "sdk_x86" ||
         buildProduct == "vbox86p" ||
-        em.brand.contains('google')||
+        em.brand.contains('google') ||
         em.board.toLowerCase().contains("nox") ||
         em.bootloader.toLowerCase().contains("nox") ||
         buildHardware.toLowerCase().contains("nox") ||
@@ -60,27 +76,41 @@ class AppModel extends ChangeNotifier {
   }
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+
   const App({Key? key}) : super(key: key);
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final AppModel _appModel;
+
+  @override
+  void initState() {
+    _appModel = AppModel();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ChangeNotifierProvider(
-        create: (_) => AppModel(),
-        child: Builder(
-          builder: (context) {
-            final model = context.watch<AppModel>();
-            if (model.isLoading) {
-              return const LoadingScreen();
-            }
-            if (model.url.isNotEmpty) {
-              return MainView(r: model.url);
-            }
-            return const ExerciseListScreen();
-          },
-        ),
-      ),
+      routes: {
+        '/': (context) =>
+            ChangeNotifierProvider.value(
+                value: _appModel..load(context),
+              child: Container(),
+            ),
+        '/exercise_list': (_) => const ExerciseListScreen(),
+        '/exercise_item': (_) => const ExerciseItemScreen(),
+        '/web_view': (_) =>
+            ChangeNotifierProvider.value(
+              value: _appModel,
+              child: MainView(),
+            ),
+      },
+      theme: createTheme(),
     );
   }
 }

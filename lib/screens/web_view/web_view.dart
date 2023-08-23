@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:provider/provider.dart';
+import 'package:workout/app.dart';
 
 class MainView extends StatefulWidget {
-  String r;
-
-  MainView({Key? key, required this.r}) : super(key: key);
+  MainView({Key? key}) : super(key: key);
 
   @override
   State<MainView> createState() => _MainViewState();
 }
 
 class _MainViewState extends State<MainView> {
+  String url = '';
+
+  @override
+  void didChangeDependencies() {
+    url = context.read<AppModel>().url;
+    super.didChangeDependencies();
+  }
+
   late InAppWebViewController _webViewController;
   double progress = 0;
 
@@ -23,20 +31,12 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          shadowColor: Colors.black.withOpacity(0.5),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => onBackPressed(),
-          ),
-        ),
         body: WillPopScope(
           onWillPop: onBackPressed,
           child: Stack(
             children: [
               InAppWebView(
-                initialUrlRequest: URLRequest(url: Uri.parse(widget.r)),
+                initialUrlRequest: URLRequest(url: Uri.parse(url)),
                 initialOptions: InAppWebViewGroupOptions(
                   crossPlatform: InAppWebViewOptions(
                     useShouldOverrideUrlLoading: true,
