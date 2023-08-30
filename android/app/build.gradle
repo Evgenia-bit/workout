@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "fortun.ei.facts.menderz"
+    namespace "fortun.ayi.facts.menderz"
     compileSdkVersion 33
     ndkVersion flutter.ndkVersion
 
@@ -48,7 +48,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "fortun.ei.facts.menderz"
+        applicationId "fortun.ayi.facts.menderz"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
